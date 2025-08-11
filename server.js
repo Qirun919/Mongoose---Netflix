@@ -30,7 +30,7 @@ const showSchema = new mongoose.Schema({
 });
 
 //create a modal from the schema
-const show = mongoose.model("show", showSchema);
+const Show = mongoose.model("Show", showSchema);
 
 // setup root route
 app.get("/", (req, res) => {
@@ -57,7 +57,7 @@ app.get("/shows", async (req, res) => {
     filter.premiere_year = { $gt: premiere_year };
   }
   // load the movies data from mongoDB
-  const shows = await show.find(filter);
+  const shows = await Show.find(filter);
   res.send(shows);
 });
 
@@ -66,7 +66,7 @@ app.get("/shows/:id", async (req, res) => {
   // retrieve id from params
   const id = req.params.id;
   // load the TVShow data based on id
-  const show = await show.findById(id);
+  const show = await Show.findById(id);
   res.send(show);
 });
 
