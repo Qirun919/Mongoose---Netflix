@@ -38,7 +38,7 @@ router.get("/", async (req, res) => {
   }
 
   // load the movies data from Mongodb
-  const movies = await Movie.find(filter);
+  const movies = await Movie.find(filter).sort({_id: -1});
   res.send(movies);
 });
 
@@ -49,6 +49,102 @@ router.get("/:id", async (req, res) => {
   // load the movie data based on id
   const movie = await Movie.findById(id);
   res.send(movie);
+});
+
+/*
+  POST /movies - add new movie
+  This POST route need to accept the following parameters:
+  -title
+  -director
+  -release_year
+  -genre
+  -rating
+*/
+
+router.post("/", async (req, res) => {
+  try {
+    const title = req.body.title;
+    const director = req.body.director;
+    const release_year = req.body.release_year;
+    const genre = req.body.genre;
+    const rating = req.body.rating;
+
+    // check error - make sure all the field are empty
+    if (!title || !director || !release_year || !genre || !rating) {
+      return res.status(400).send({
+        message: "All fields are required",
+      });
+    }
+
+    // create new movie
+    const newMovie = new Movie({
+      title: title,
+      director: director,
+      release_year: release_year,
+      genre: genre,
+      rating: rating,
+    });
+    // save the new movie into MOngoDB
+    await newMovie.save(); // clicking the "save" button
+
+    res.status(200).send(newMovie);
+  } catch (error) {
+    return res.status(400).send({
+      message: "Unknown error",
+    });
+  }
+});
+
+// PUT /movies/68941fa294f0b166942289e0 - update movie
+router.put("/:id", async (req, res) => {
+  try {
+    const id = req.params.id; // id of the movie
+    const title = req.body.title;
+    const director = req.body.director;
+    const release_year = req.body.release_year;
+    const genre = req.body.genre;
+    const rating = req.body.rating;
+
+    // check error - make sure all the field are empty
+    if (!title || !director || !release_year || !genre || !rating) {
+      return res.status(400).send({
+        message: "All fields are required",
+      });
+    }
+
+    const updatedMovie = await Movie.findByIdAndUpdate(
+      id,
+      {
+        title: title,
+        director: director,
+        release_year: release_year,
+        genre: genre,
+        rating: rating,
+      },
+      {
+        new: true, // return the updated data
+      }
+    );
+
+    res.status(200).send(updatedMovie);
+  } catch (error) {
+    return res.status(400).send({
+      message: "Unknown error",
+    });
+  }
+});
+
+// DELETE /movies/68941fa294f0b166942289e0 - delete movie
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deletedMovie = await Movie.findByIdAndDelete(id);
+    res.status(200).send({
+      message: `Movie with the ID of ${id} has been deleted`,
+    });
+  } catch (error) {
+    res.status(400).send({ message: "Unknown error" });
+  }
 });
 
 module.exports = router;
